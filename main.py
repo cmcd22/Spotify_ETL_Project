@@ -36,3 +36,22 @@ def get_api(path, token, params=None):
         else:
             print(resp.status_code)
             return None
+
+def find_artist_id(name, token):
+    """
+    Make a request to Spotify API and returns the artist ID
+    """
+    query = {"q": name, "type": "artist"}
+    data = get_api("search", token, query)
+    items = data.get("artists", {}).get("items", [])
+    artist = items[0] if len(items) > 0 else None
+    return artist["id"]
+
+if __name__ == "__main__":
+    token = get_token()
+    artist_input = input("Enter artist name: ")
+    artist_id = find_artist_id(artist_input, token)
+    artist = get_api(f"artists/{artist_id}", token)
+    top_tracks = get_api(f"artists/{artist_id}/top-tracks", token)
+    print("Artist:", artist.get("name"), "| Followers:", artist.get("followers", {}).get("total"))
+    print("Top tracks:", [t["name"] for t in top_tracks.get("tracks", [])])
